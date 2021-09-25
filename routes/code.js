@@ -48,7 +48,7 @@ const cExecute = (data, input) => {
                 
                 // SUCCESSFULL COMPILATION EXECUTING
                 console.log("SUCCESSFULLY COMPILED")
-                exec('a.exe < '+'input.txt', (err, stdout, stderr) => {
+                exec('./a.out < '+'input.txt', (err, stdout, stderr) => {
                   if(err){
                     console.log("ERROR "+err)
                     resolve({
@@ -81,10 +81,16 @@ const cExecute = (data, input) => {
 
 router.post('/submit', (req,res)=>{
   const {code, input, lang} = req.body
-  return cExecute(code,input)
-      .then(data=>{
-            res.json(data)
-        })
+  console.log(req.body)
+  if(lang==="c"){
+    cExecute(code,input)
+        .then(data=>{
+          console.log(data);
+            return res.json(data)
+          })
+  }else if (lang==="c++"){
+    
+  }
 })
 
 module.exports = router
