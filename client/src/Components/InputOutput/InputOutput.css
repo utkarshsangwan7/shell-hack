@@ -1,0 +1,9 @@
+.input-output-wrapper{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap:1vw;
+}
+.input-output-option{
+    width: 100%;
+}
