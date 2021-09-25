@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import AceEditor from "react-ace";
 import './App.css';
 import "ace-builds/src-noconflict/mode-java";
@@ -9,7 +9,9 @@ import "ace-builds/src-noconflict/theme-monokai";
 import Sidebar from './Components/Sidebar/Sidebar';
 import InputOuput from './Components/InputOutput/InputOutput';
 import { Box } from '@mui/material';
+import Socketio from 'socket.io-client';
 
+const socket = Socketio(`${process.env.REACT_APP_SERVER_URL}`,{ transports: ['websocket', 'polling', 'flashsocket'] });
 function App() {
   const [code,setCode] = useState(`function onLoad(editor) {
     console.log("i've loaded");
@@ -18,6 +20,7 @@ function App() {
   const [Theme,setTheme] = useState('monokai');
   const [Input,setInput] = useState('');
   const [Output,setOutput] = useState('');
+  const [RoomID,setRoomID] = useState('');
   const onChange = (newValue)=>{
     console.log("change", newValue);
     setCode(newValue);
@@ -27,6 +30,18 @@ function App() {
     console.log("The editor is loaded!!");
   }
 
+  useEffect(()=>{
+    socket.on('Welcome',(id)=>{
+      setRoomID(id);
+      console.log(id);
+      socket.emit('join',(id));
+    });
+
+    socket.on('JoinedRoom',(message)=>{
+      console.log(message);
+    });
+  },[socket]);
+
   return (
     <div className="App">
         <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gap={2}>
@@ -34,7 +49,7 @@ function App() {
               <h1>Code, Compile & Run</h1>
             </Box>
             <Box gridColumn="span 12">
-              <Sidebar language={language} theme={Theme} setLanguage={setLanguage} setTheme={setTheme}/>
+              <Sidebar language={language} theme={Theme} setLanguage={setLanguage} setTheme={setTheme} RoomID={RoomID}/>
             </Box>
             <Box gridColumn="span 12">
                 <AceEditor

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Select,InputLabel,MenuItem} from '@mui/material';
+import { Select,InputLabel,MenuItem,Button} from '@mui/material';
 import './Sidebar.css';
 
-const Sidebar = ({language,theme,setLanguage,setTheme})=>{
+const Sidebar = ({language,theme,setLanguage,setTheme,RoomID})=>{
     const handleChangeLanguage = (e)=>{
         console.log(e.target.value);
         setLanguage(e.target.value);
@@ -43,6 +43,9 @@ const Sidebar = ({language,theme,setLanguage,setTheme})=>{
                         <MenuItem value={'github'}>light</MenuItem>
                         <MenuItem value={'monokai'}>dark</MenuItem>
                     </Select>
+                </div>
+                <div>
+                    <Button variant="outlined" onClick={() => {navigator.clipboard.writeText(`${process.env.REACT_APP_SERVER_URL}/join-room/${RoomID}`)}}>Invite Collaborators</Button>
                 </div>
         </div>
     );
