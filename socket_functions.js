@@ -1,11 +1,8 @@
-module.exports = (socket,Roomid)=>{
-    const join_room = ()=>{
-        socket.on('join',(id)=>{
-            Roomid = id;
+module.exports = (socket)=>{
+    const join_room = (id)=>{
             socket.join(id);
             socket.emit('JoinedRoom','Congratulations on Joining the room');
-        });
-    }
+        };
     return{
         join_room
     };

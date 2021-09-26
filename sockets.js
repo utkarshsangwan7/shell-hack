@@ -1,22 +1,14 @@
-const get_socket_function = require('./socket_functions');
-const { v4: uuidv4 } = require('uuid');
-
+const get_socket_functions = require('./socket_functions');
 let Roomid = null;
-const io_utils = (io)=>{
+const io_utils = (io,id)=>{
     io.on('connection',(socket)=>{
-        const id = uuidv4();
         socket.emit('Welcome',id);
-        const {} = get_socket_function
-        socket.on('join',(id)=>{
-            Roomid = id;
-            socket.join(id);
-            socket.emit('JoinedRoom','Congratulations on Joining the room');
-        });
+        const {join_room} = get_socket_functions(socket);
+        socket.on('join',join_room);
         socket.on('disconnect',()=>{
             console.log('The User left');
         });
     });
 }
-
 
 module.exports = io_utils;
