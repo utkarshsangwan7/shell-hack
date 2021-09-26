@@ -9,6 +9,7 @@ import "ace-builds/src-noconflict/theme-monokai";
 import Sidebar from './Components/Sidebar/Sidebar';
 import InputOuput from './Components/InputOutput/InputOutput';
 import { Box } from '@mui/material';
+import axios from 'axios';
 import Socketio from 'socket.io-client';
 
 const socket = Socketio(`${process.env.REACT_APP_SERVER_URL}`,{ transports: ['websocket', 'polling', 'flashsocket'] });
@@ -41,6 +42,21 @@ function App() {
       console.log(message);
     });
   },[socket]);
+
+  const handleCompile=async ()=>{
+    const data={
+      code : code,
+      lang : language,
+      input : Input
+    }
+    console.log(data);
+    const datares=await axios.post(`${process.env.REACT_APP_SERVER_URL}/code/submit`,data);
+    console.log(datares);
+    if(datares.data.err){
+      return setOutput(datares.data.err)
+    }
+    return setOutput(datares.data.output)
+  }
 
   return (
     <div className="App">
@@ -76,6 +92,9 @@ function App() {
             </Box>
             <Box gridColumn="span 12">
               <InputOuput Input={Input} Output={Output} setInput={setInput} setOutput={setOutput}/>
+            </Box>
+            <Box gridColumn="span 12">
+              <button onClick={handleCompile}>Compile</button>
             </Box>
       </Box>
     </div>
