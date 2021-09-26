@@ -4,6 +4,7 @@ import { CodemirrorBinding } from "y-codemirror";
 import { UnControlled as CodeMirrorEditor } from "react-codemirror2";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
+import { useParams } from 'react-router-dom';
 import "./Editor.css";
 import RandomColor from "randomcolor";
 
@@ -62,15 +63,17 @@ const [EditorRef, setEditorRef] = useState(null);
   const handleEditorDidMount = (editor) => {
     setEditorRef(editor);
   };
+  let { id } = useParams();
 
   useEffect(() => {
-    
+
+    console.log(id);
     if (EditorRef) {
       const ydoc = new Y.Doc(); //create a ydoc 
 
       let provider = null;
       try {
-        provider = new WebrtcProvider("Any Room Name" , ydoc, {
+        provider = new WebrtcProvider(id , ydoc, {
           signaling: [
             "wss://signaling.yjs.dev",
             'wss://y-webrtc-signaling-eu.herokuapp.com', 

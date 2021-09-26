@@ -1,7 +1,7 @@
 const Login=()=>{
 
     const handleClick=()=>{
-        console.log('clicked...');
+        window.location.href=`${process.env.REACT_APP_SERVER_URL}/api/user/auth/callback`
     }
 
     return (

@@ -18,7 +18,7 @@ function App() {
         <Route path="/login">
           <Login />
         </Route>
-        <Route path="/compiler">
+        <Route path="/compiler/:id">
           <Editor />
         </Route>
       </Switch>
