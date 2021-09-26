@@ -1,11 +1,12 @@
 import React,{useState,useEffect} from 'react';
-import AceEditor from "react-ace";
+import {Controlled as CodeMirror} from 'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/theme/eclipse.css';
+import 'codemirror/theme/cobalt.css';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/python/python';
 import './App.css';
-import "ace-builds/src-noconflict/mode-java";
-import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools"
-import "ace-builds/src-noconflict/theme-monokai";
 import Sidebar from './Components/Sidebar/Sidebar';
 import InputOuput from './Components/InputOutput/InputOutput';
 import { Box } from '@mui/material';
@@ -17,19 +18,14 @@ function App() {
   const [code,setCode] = useState(`function onLoad(editor) {
     console.log("i've loaded");
   }`);
-  const [language,setLanguage] = useState('javascript');
-  const [Theme,setTheme] = useState('monokai');
+  const [options,setOptions] = useState({
+    mode: 'javascript',
+    theme: 'eclipse',
+    lineNumbers: true
+  });
   const [Input,setInput] = useState('');
   const [Output,setOutput] = useState('');
   const [RoomID,setRoomID] = useState('');
-  const onChange = (newValue)=>{
-    console.log("change", newValue);
-    setCode(newValue);
-  }
-  
-  const onLoad = (editor)=>{
-    console.log("The editor is loaded!!");
-  }
 
   useEffect(()=>{
     socket.on('Welcome',(id)=>{
@@ -46,7 +42,7 @@ function App() {
   const handleCompile=async ()=>{
     const data={
       code : code,
-      lang : language,
+      lang : options.mode,
       input : Input
     }
     console.log(data);
@@ -65,30 +61,17 @@ function App() {
               <h1>Code, Compile & Run</h1>
             </Box>
             <Box gridColumn="span 12">
-              <Sidebar language={language} theme={Theme} setLanguage={setLanguage} setTheme={setTheme} RoomID={RoomID}/>
+              <Sidebar options={options} setOptions={setOptions} RoomID={RoomID}/>
             </Box>
             <Box gridColumn="span 12">
-                <AceEditor
-                placeholder="Placeholder Text"
-                mode="javascript"
-                width='75vw'
-                height='60vh'
-                theme={Theme}
-                name="blah2"
-                onLoad={onLoad}
-                onChange={onChange}
-                fontSize={14}
-                showPrintMargin={true}
-                showGutter={true}
-                highlightActiveLine={true}
-                value={`${code}`}
-                setOptions={{
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: false,
-                enableSnippets: false,
-                showLineNumbers: true,
-                tabSize: 2,
-                }}/>
+                <CodeMirror
+                  value={code}
+                  options={options}
+                  onBeforeChange={(editor, data, value) => {
+                    setCode(value);
+                    console.log(value);
+                  }}
+                />
             </Box>
             <Box gridColumn="span 12">
               <InputOuput Input={Input} Output={Output} setInput={setInput} setOutput={setOutput}/>

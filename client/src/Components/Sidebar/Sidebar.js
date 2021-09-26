@@ -2,14 +2,16 @@ import React from 'react';
 import { Select,InputLabel,MenuItem,Button} from '@mui/material';
 import './Sidebar.css';
 
-const Sidebar = ({language,theme,setLanguage,setTheme,RoomID})=>{
+const Sidebar = ({options,setOptions,RoomID})=>{
     const handleChangeLanguage = (e)=>{
-        console.log(e.target.value);
-        setLanguage(e.target.value);
+        const obj = {...options};
+        obj.mode=e.target.value;
+        setOptions(obj);
     }
     const handleChangeTheme = (e)=>{
-        console.log(e.target.value);
-        setTheme(e.target.value);
+        const obj = {...options};
+        obj.theme=e.target.value;
+        setOptions(obj);
     }
     return(
         <div className='language-theme-option'>
@@ -18,7 +20,7 @@ const Sidebar = ({language,theme,setLanguage,setTheme,RoomID})=>{
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={language}
+                        value={options.mode}
                         label="Language"
                         onChange={handleChangeLanguage}
                         className='select-option'
@@ -35,13 +37,14 @@ const Sidebar = ({language,theme,setLanguage,setTheme,RoomID})=>{
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={theme}
+                        value={options.theme}
                         label="Theme"
                         onChange={handleChangeTheme}
                         className='select-option'
                     >
-                        <MenuItem value={'github'}>light</MenuItem>
-                        <MenuItem value={'monokai'}>dark</MenuItem>
+                        <MenuItem value={'eclipse'}>Eclipse</MenuItem>
+                        <MenuItem value={'cobalt'}>Cobalt</MenuItem>
+                        <MenuItem value={'material'}>Material</MenuItem>
                     </Select>
                 </div>
                 <div>
