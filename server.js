@@ -1,19 +1,54 @@
+require('dotenv').config();
 const express= require('express');
 const socketio = require('socket.io');
 const http = require('http');
+const mongoose = require("mongoose");
 const app= express();
 const cors=require('cors');
+require("./config/passport");
+const session = require("express-session");
+const MongoStore = require("connect-mongo")
+const path = require("path");
 const server = http.createServer(app);
-const io = socketio(server,{cors:true}); 
+const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
+const passport = require('passport');
 const { v4: uuidv4 } = require('uuid');
-require('dotenv').config();
+
+
+const io = socketio(server,{cors:true}); 
 const id = uuidv4();
 require('./sockets')(io,id);
 
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json());
+// * DB Connection
+mongoose.connect(
+  process.env.MONGO_URI,
+  {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true,
+  },
+  (err) => {
+    if (err) return console.log("Connection to MongoDB failed.\n", err);
+    return console.log("Connected to MongoDB");
+  }
+);
 
+// * Middleware
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(
+  session({
+    // store: MongoStore.create({ mongooseConnection: mongoose.connection }),
+    secret: process.env.COOKIESECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000, /*secure: true,*/ httpOnly: true },
+  })
+);
+app.use(cookieParser());
 app.use(cors({ origin: `${process.env.CLIENT_URL}`, credentials: true }));
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", `${process.env.CLIENT_URL}`);
@@ -25,8 +60,13 @@ app.use((req, res, next) => {
   );
   next();
 });
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ** Routes importing **
 
 app.use('/code',require('./routes/code'));
+app.use("/api/user", require('./routes/auth'));
 
 app.get('/',(req,res)=>{
     res.send('Hello World!');
@@ -39,3 +79,25 @@ app.get('/join-room/:rid',(req,res)=>{
 server.listen(port,()=>{
     console.log(`server started on ${port}`)
 })
+
+if (process.env.NODE_ENV === "production") {
+  console.log("production", envConfig);
+  app.use(express.static(path.resolve(__dirname, "Client", "build")));
+  app.get("/*", function (req, res) {
+    // this -->
+    res.cookie("XSRF-TOKEN", req.csrfToken());
+    res.sendFile(path.resolve(__dirname, "Client", "build", "index.html"));
+  });
+}
+
+app.use("/static", express.static(__dirname + "\\Client\\src\\assets"));
+console.log(__dirname + "\\Client");
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err, promise) => {
+  console.log(`Error: ${err.message}`);
+});
+
+process.on("uncaughtException", (err, promise) => {
+  console.log(`Error: ${err.message}`);
+});

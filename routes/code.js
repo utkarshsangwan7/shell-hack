@@ -19,10 +19,15 @@ const saveFile = (name, data) => {
 }
 
 // Function for executing C codes
-const cExecute = (data, input) => {
+const cExecute = (data, input,lang) => {
   return new Promise((resolve, reject)=>{
-      const fileName = "test.c"
-      saveFile(fileName, data)
+    let fileName;
+    if(lang==="c"){
+      fileName = "test.c"
+    } else if(lang==="text/x-c++src"){
+      fileName = "test.cpp"
+    } 
+      saveFile(fileName, data,lang)
         .then(()=>{
           // Create Input file
           fs.writeFile("input.txt", input, function(err) {
@@ -34,37 +39,71 @@ const cExecute = (data, input) => {
       
             // FILE SAVED SUCCESSFULLY
             // Generate the output file for it
-            const filePath = path.join(__dirname,"../test.c")
-            exec('gcc '+filePath, (err, stdout, stderr) => {
-                if (err) {
-                  // IF COMPILATION ERROR
-                  console.error(`exec error: ${err}`);
-                  resolve({
-                    err: true,
-                    output: err,
-                    error: stderr
-                  })
-                }
-                
-                // SUCCESSFULL COMPILATION EXECUTING
-                console.log("SUCCESSFULLY COMPILED")
-                exec('./a.out < '+'input.txt', (err, stdout, stderr) => {
-                  if(err){
-                    console.log("ERROR "+err)
+            if(lang==="c"){
+              const filePath = path.join(__dirname,"../test.c")
+              exec('gcc '+filePath, (err, stdout, stderr) => {
+                  if (err) {
+                    // IF COMPILATION ERROR
+                    console.error(`exec error: ${err}`);
                     resolve({
                       err: true,
                       output: err,
                       error: stderr
                     })
                   }
-        
-                  console.log("OUTPUT ", stdout)
-                  resolve({
-                    err: false,
-                    output: stdout
+                  
+                  // SUCCESSFULL COMPILATION EXECUTING
+                  console.log("SUCCESSFULLY COMPILED")
+                  exec('./a.out < '+'input.txt', (err, stdout, stderr) => {
+                    if(err){
+                      console.log("ERROR "+err)
+                      resolve({
+                        err: true,
+                        output: err,
+                        error: stderr
+                      })
+                    }
+          
+                    console.log("OUTPUT ", stdout)
+                    resolve({
+                      err: false,
+                      output: stdout
+                    })
                   })
                 })
-              })
+            }else if(lang==="text/x-c++src"){
+              const filePath = path.join(__dirname,"../test.cpp")
+              exec(`g++ ${filePath} -o cpp`, (err, stdout, stderr) => {
+                  if (err) {
+                    // IF COMPILATION ERROR
+                    console.error(`exec error: ${err}`);
+                    resolve({
+                      err: true,
+                      output: err,
+                      error: stderr
+                    })
+                  }
+                  
+                  // SUCCESSFULL COMPILATION EXECUTING
+                  console.log("SUCCESSFULLY COMPILED")
+                  exec('./cpp < '+'input.txt', (err, stdout, stderr) => {
+                    if(err){
+                      console.log("ERROR "+err)
+                      resolve({
+                        err: true,
+                        output: err,
+                        error: stderr
+                      })
+                    }
+          
+                    console.log("OUTPUT ", stdout)
+                    resolve({
+                      err: false,
+                      output: stdout
+                    })
+                  })
+                })
+            }
 
         })
         .catch((e)=>{
@@ -82,15 +121,11 @@ const cExecute = (data, input) => {
 router.post('/submit', (req,res)=>{
   const {code, input, lang} = req.body
   console.log(req.body)
-  if(lang==="c"){
-    cExecute(code,input)
+    cExecute(code,input,lang)
         .then(data=>{
           console.log(data);
             return res.json(data)
           })
-  }else if (lang==="c++"){
-    
-  }
 })
 
 module.exports = router

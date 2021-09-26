@@ -12,6 +12,7 @@ const Sidebar = ({options,setOptions,RoomID})=>{
         const obj = {...options};
         obj.theme=e.target.value;
         setOptions(obj);
+        console.log(obj)
     }
     return(
         <div className='language-theme-option'>
@@ -26,10 +27,10 @@ const Sidebar = ({options,setOptions,RoomID})=>{
                         className='select-option'
                     >
                         <MenuItem value={'c'}>C</MenuItem>
-                        <MenuItem value={'c++'}>C++</MenuItem>
-                        <MenuItem value={'java'}>Java</MenuItem>
-                        <MenuItem value={'python'}>Python</MenuItem>
-                        <MenuItem value={'javascript'}>JavaScript</MenuItem>
+                        <MenuItem value={'text/x-c++src'}>C++</MenuItem>
+                        <MenuItem value={'text/x-java'}>Java</MenuItem>
+                        <MenuItem value={'text/x-python'}>Python</MenuItem>
+                        <MenuItem value={'text/javascript'}>JavaScript</MenuItem>
                     </Select>
                 </div>
                 <div>
@@ -45,6 +46,8 @@ const Sidebar = ({options,setOptions,RoomID})=>{
                         <MenuItem value={'eclipse'}>Eclipse</MenuItem>
                         <MenuItem value={'cobalt'}>Cobalt</MenuItem>
                         <MenuItem value={'material'}>Material</MenuItem>
+                        <MenuItem value={'dracula'}>Dracula</MenuItem>
+                        <MenuItem value={'material-palenight'}>Material-Palenight</MenuItem>
                     </Select>
                 </div>
                 <div>
