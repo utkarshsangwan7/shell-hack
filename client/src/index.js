@@ -3,11 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {RoomContextProvider} from './store/RoomContext'
+import {ChatContextsProvider} from './store/ChatContexts';
 
 ReactDOM.render(
+  <RoomContextProvider>
+  <ChatContextsProvider>
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
+  </ChatContextsProvider>
+  </RoomContextProvider>,
   document.getElementById('root')
 );
 
