@@ -1,5 +1,4 @@
-import React,{useState,useEffect,useRef} from 'react';
-import {Controlled as CodeMirror} from 'react-codemirror2';
+import React,{useState,useEffect,useRef,useContext} from 'react';
 import { CodemirrorBinding } from "y-codemirror";
 import { UnControlled as CodeMirrorEditor } from "react-codemirror2";
 import * as Y from "yjs";
@@ -52,19 +51,23 @@ import 'codemirror/theme/eclipse.css';
 import 'codemirror/theme/cobalt.css';
 import Sidebar from '../../Components/Sidebar/Sidebar';
 import InputOuput from '../../Components/InputOutput/InputOutput';
+import RoomContext from '../../store/RoomContext';
 import { Box } from '@mui/material';
 import axios from 'axios';
+import Chat from '../../Components/Chat/Chat';
 
-
-const Editor=()=>{
+const Editor=(props)=>{
 const [EditorRef, setEditorRef] = useState(null);
   const [code, setCode] = useState("");
-  
   const handleEditorDidMount = (editor) => {
     setEditorRef(editor);
   };
   let { id } = useParams();
-
+  const roomCtx = useContext(RoomContext);
+  
+  useEffect(()=>{
+    roomCtx.idGen(id);
+  },[]);
   useEffect(() => {
 
     console.log(id);
@@ -132,18 +135,6 @@ const [EditorRef, setEditorRef] = useState(null);
   const [Output,setOutput] = useState('');
   const [RoomID,setRoomID] = useState('');
 
-  // useEffect(()=>{
-  //   socket.on('Welcome',(id)=>{
-  //     setRoomID(id);
-  //     console.log(id);
-  //     socket.emit('join',(id));
-  //   });
-
-  //   socket.on('JoinedRoom',(message)=>{
-  //     console.log(message);
-  //   });
-  // },[socket]);
-
   const handleCompile=async ()=>{
     const data={
       code : code,
@@ -196,6 +187,9 @@ const [EditorRef, setEditorRef] = useState(null);
             </Box>
             <Box gridColumn="span 12">
               <button onClick={handleCompile}>Compile</button>
+            </Box>
+            <Box gridColumn="span 12">
+                <Chat/>
             </Box>
       </Box>
     </div>

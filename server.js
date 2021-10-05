@@ -14,11 +14,16 @@ const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
 const passport = require('passport');
 const { v4: uuidv4 } = require('uuid');
-
+const {messages,
+  All_participants,
+  insert_participants,
+  remove_participant,
+  insert_Messages,
+  filter_Messages,
+  filter_Users} = require('./chat.js');
 
 const io = socketio(server,{cors:true}); 
 const id = uuidv4();
-require('./sockets')(io,id);
 
 // * DB Connection
 mongoose.connect(
@@ -62,6 +67,46 @@ app.use((req, res, next) => {
 });
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+// ** Sockets **
+
+io.on('connection',(socket)=>{
+	let GID = '';
+	socket.emit('Welcome','Welcome to the meet');
+	socket.on('Join',(groupId,streamID/*,UserId,VideoID,ScreenID*/)=>{
+    if(groupId){
+      socket.join(groupId);
+      console.log('ping for new user',streamID);
+      insert_participants(/*UserId,*/groupId,socket.id,streamID);
+      io.sockets.in(groupId).emit('NewUser','A new User joined');
+      socket.to(groupId).emit('CallNewUser',streamID);
+      GID = groupId;
+      insert_Messages('BOT',`@UserId jumped in!!`,groupId);
+      const groupChat = filter_Messages(groupId);
+      const group_list = filter_Users(groupId);
+      io.sockets.in(groupId).emit('GroupChat',groupChat);
+      io.sockets.in(groupId).emit('UpdateParticipants',group_list);
+    }
+	});
+  socket.on('conversation',(message,groupId,UserId)=>{
+		insert_Messages(UserId,message,groupId);
+		const groupChat = filter_Messages(groupId);
+		io.sockets.in(groupId).emit('GroupChat',groupChat);
+	});
+  socket.on('diconnect',()=>{
+    console.log('user disconnected');
+		const user = remove_participant(socket.id);
+		if(user){
+			insert_Messages('BOT',`@UserID Left the meet`,user.groupId);
+			const groupChat = filter_Messages(user.groupId);
+			const group_list = filter_Users(user.groupId);
+			io.sockets.in(user.groupId).emit('GroupChat',groupChat);
+			io.sockets.in(user.groupId).emit('RemoveParticipantLeft',user);
+			io.sockets.in(user.groupId).emit('UpdateParticipants',group_list);
+		}
+  });
+});
 
 // ** Routes importing **
 
